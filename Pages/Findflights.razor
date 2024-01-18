@@ -1,0 +1,219 @@
+﻿@page "/findflights"
+@using TravelLess_App.Data;
+@using System.IO;
+<div>
+	<div class="row"><h3 style="text-align:center">Flight Finder</h3></div>
+	<div class="row g-3">
+		<div class="col-6">From:</div>
+		<div class="col-6">To:</div>
+	</div>
+	<div class="row  g-3">
+		<div class="col-6">
+			<select @onchange="showselected" class="form-select" aria-label="Default select example">
+				<option>From</option>
+				@foreach (var a in airports)
+				{
+					<option value="@a.Code">@a.Airportname</option>
+				}
+			</select>
+		</div>
+		<div class="col-6">
+			<select class="form-select" aria-label="Default select example" @onchange="showselected1">
+				<option>To</option>
+				@foreach (var a in airports)
+				{
+					<option value="@a.Code">@a.Airportname</option>
+				}
+			</select>
+		</div>
+	</div>
+	<div class="row g-3">
+		<div class="col-6">Date:</div>
+	</div>
+	<div class="row">
+		<div class="col-6 ">
+			<select class="form-select" aria-label="Default select example" @onchange="showselected2">
+				<option value="">Day</option>
+				<option value="Monday">Monday</option>
+				<option value="Tuesday">Tuesday</option>
+				<option value="Wednesday">Wednesday</option>
+				<option value="Thursday">Thursday</option>
+				<option value="Friday">Friday</option>
+				<option value="Saturday">Saturday</option>
+				<option value="Sunday">Sunday</option>
+			</select>
+		</div>
+
+		<div class="col-3 ">
+			<button type="button" class="btn btn-primary" @onclick="fetchdata" style="width:14em">Find Flights</button>
+		</div>
+	</div>
+		
+
+	<div class="row mt-5"><h3 style="text-align:center">Flights</h3></div>
+	<div class="row g-3">
+		<div class="col-sm mb-3">
+			<input type="text" class="form-control" id="flights"  placeholder="Loading..." value="@message">
+		</div>
+	</div>
+	<div class="row mt-5"><h3 style="text-align:center">Reserve</h3></div>
+	<div class="row  g-3">
+		<div class="col-6">Flight Code:</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<input type="text" class="form-control" id="flights" placeholder="Flight"  value="@flightcode">
+		</div>
+	</div>
+	<div class="row mt-2  g-3">
+		<div class="col-6">Airline:</div>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<input type="text" class="form-control" id="flights" placeholder="Airline" value="@airlinename">
+		</div>
+	</div>
+	<div class="row mt-3  g-3">
+		<div class="col-4">Day:</div>
+		<div class="col-4">Time:</div>
+		<div class="col-4">Cost:</div>
+	</div>
+	<div class="row">
+		<div class="col-4">
+			<input type="text" class="form-control" id="flights" placeholder="Day"  value="@dayOfFlight">
+		</div>
+		<div class="col-4">
+			<input type="text" class="form-control" id="flights" placeholder="Time"  value="@timeOfFlight">
+		</div>
+		<div class="col-4">
+			<input type="text" class="form-control" id="flights" placeholder="Cost"  value="@costOfFlight">
+		</div>
+	</div>
+	<div class="row mt-3  g-3">
+		<div class="col-6">Name:</div>
+		<div class="col-6">Citizenship:</div>
+	</div>
+	<div class="row">
+		<div class="col-6">
+			<input type="text" class="form-control" id="flights" placeholder="Name" @oninput="NameofPass">
+		</div>
+		<div class="col-6">
+			<input type="text" class="form-control" id="flights" placeholder="Citizenship" @oninput="citizenshipStatus">
+		</div>
+	</div>
+	<div class="row mt-4">
+		<div class="col-5"></div>
+		<div class="col-5"><button type="button" class="btn btn-primary" style="width:15em" @onclick="reserve">Reserve</button></div>
+	</div>
+	<div class="row mt-3">
+		<div class="col-5"></div>
+		<div class="col-2"><p>Reservation Code:</p></div>
+	</div>
+	<div class="col"><span>@reservationcode</span></div>
+
+</div>
+@code {
+	AirportManager am = new AirportManager();
+	List<Airport> airports = AirportManager.GetAirports();
+	FlightManager fm = new FlightManager();
+	List<Flights> flight = FlightManager.GetFlights();
+	string selected1;
+	string selected2;
+	string selected3;
+	string message;
+	string flightcode;
+	string airlinename;
+	string dayOfFlight;
+	string timeOfFlight;
+	string costOfFlight;
+	string reservationcode;
+	string name;
+	string citizenship;
+	string status = "Active";
+	bool flag;
+	double seats;
+	private void showselected(ChangeEventArgs e)
+	{
+		selected1 = e.Value.ToString();
+	}
+	private void showselected1(ChangeEventArgs e)
+	{
+		selected2 = e.Value.ToString();
+	}
+	private void showselected2(ChangeEventArgs e)
+	{
+		selected3 = e.Value.ToString();
+	}
+	private void fetchdata()
+	{
+		flag = false;
+		foreach (var f in flight)
+		{
+			if (selected1 == f.Departairport && selected2 == f.Destairport && selected3 == f.Day)
+			{
+				message = f.Flightno + ", " + f.Flightname + ", " + f.Departairport + ", " + f.Destairport + ", " + f.Day + ", " + f.Time + ", " + f.Cost;
+				flightcode = f.Flightno;
+				airlinename = f.Flightname;
+				dayOfFlight = f.Day;
+				timeOfFlight = f.Time;
+				costOfFlight = f.Cost;
+				flag = true;
+				seats = double.Parse(f.Seats);
+			}
+		}
+		if (flag == false)
+		{
+			message = "Loading...";
+			flightcode = "Flight";
+			airlinename = "Airline";
+			dayOfFlight = "Day";
+			timeOfFlight = "Time";
+			costOfFlight = "Cost";
+		}
+	}
+	private void NameofPass(ChangeEventArgs e)
+	{
+		name = e.Value.ToString();
+	}
+	private void citizenshipStatus(ChangeEventArgs e)
+	{
+		citizenship = e.Value.ToString();
+	}
+
+	private void reserve()
+	{
+			if (seats > 0 && name != null && citizenship != null && flightcode != null)
+			{
+				Random random = new Random();
+				const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				const string digits = "0123456789";
+
+				reservationcode = letters[random.Next(letters.Length)].ToString();
+				for (int i = 0; i < 4; i++)
+				{
+					reservationcode += digits[random.Next(digits.Length)];
+				}
+				Reservation reservation = new Reservation(reservationcode, flightcode, airlinename, costOfFlight, name, citizenship, status);
+				List<Reservation> res = new List<Reservation>();
+				res.Add(reservation);
+				reservation.writetofile(res);
+			}
+			else if (seats < 0)
+			{
+				throw new NoMoreSeatsException();
+			}
+			else if (name == null)
+			{
+				throw new NoNameException();
+			}
+			else if (flightcode == null)
+			{
+				throw new InvalidFlightCodeException();
+			}
+			else
+			{
+				throw new InvalidCitizenshipException();
+			}
+	}
+
+}

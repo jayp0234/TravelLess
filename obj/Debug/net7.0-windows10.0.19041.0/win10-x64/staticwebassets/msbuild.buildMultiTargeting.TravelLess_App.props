@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\TravelLess_App.props" />
+</Project>
